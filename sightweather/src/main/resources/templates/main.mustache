@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 부트스트랩 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 제이쿼리 -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style>
+        .my_header {
+            background-color: antiquewhite;
+            margin: 20px;
+            border-bottom: 1px solid gray;
+        }
+        
+        .my_table {
+            display: grid;
+            background-color: antiquewhite;
+            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+            grid-gap: 15px;
+        }
+        
+        .my_margin {
+            margin: 30px;
+        }
+        
+        .my_btn {
+            background-color: antiquewhite;
+            color: black;
+            border-radius: 6px;
+        }
+        
+        .my_btn:hover {
+            background-color: bisque;
+            color: black;
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <div class="d-flex justify-content-center mt-3 my_header">
+            <h2>관광코스별 관광지 상세 날씨 조회서비스</h2>
+        </div>
+    </header>
+
+    <div class="container d-flex justify-content-end">
+
+        <div class="my_margin">
+            <input id="courseId" type="text" placeholder="코스번호를 입력하세요">
+            <button class="my_btn" id="num-search">검색</button>
+        </div>
+
+    </div>
+
+    <div>
+        <table class="my_table" id="append-box"></table>
+    </div>
+
+</body>
+
+<script>
+    // 이벤트 리스너
+    $("#num-search").click(() => {
+        getWeatherNum();
+    });
+
+    // 코스 번호로 검색
+    async function getWeatherNum() {
+        let courseId = $("#courseId").val();
+        let response = await fetch(`/weather/${courseId}`);
+        let responseParse = await response.json();
+        if (response.status == 200) {
+            let data = responseParse.response.body.items.item;
+            console.log(data);
+            data.forEach((item) => {
+                $("#append-box").append(weatherRender(item));
+            });
+        }
+    }
+
+    function weatherRender(item) {
+        let courseName = item.courseName
+        let courseAreaName = item.courseAreaName
+        let spotAreaName = item.spotAreaName
+        let spotName = item.spotName
+        let tm = item.tm
+        let sky = item.sky
+        let pop = item.pop
+        if (sky == 1) {
+            sky = "맑음";
+        } else if (sky == 2) {
+            sky = "구름";
+        } else if (sky == 3) {
+            sky = "흐림";
+        } else if (sky == 4) {
+            sky = "비";
+        } else if (sky == 5) {
+            sky = "소나기";
+        } else if (sky == 6) {
+            sky = "비눈";
+        } else if (sky == 7) {
+            sky = "눈비";
+        } else {
+            sky = "눈";
+        }
+        return `<div class="card" style="margin-top: 20px;">
+                    <div class="card-body">
+                        <h4 class="card-title">코스명 : ${courseName}</h4>
+                        <p class="card-text">• 지역: ${courseAreaName} ${spotAreaName}</p>
+                        <p class="card-text">• 관광지명: ${spotName}</p>
+                        <p class="card-text">• 예보시간:${tm}</p>
+                        <p class="card-text">• 하늘상태:${sky}</p>
+                        <p class="card-text">• 강수량:${pop}</p>
+                    </div>
+                </div>`;
+    }
+</script>
+
+</html>
